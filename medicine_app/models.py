@@ -3,9 +3,6 @@ from django.core.exceptions import ValidationError
 import re
 import bcrypt
 
-# ==============================
-# Regex Validators
-# ==============================
 NAME_RE = re.compile(r"^[A-Za-z][A-Za-z\s\-'`]{1,}$")
 EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 PASSWORD_RE = re.compile(r"^(?=.*[A-Za-z])(?=.*\d).{8,}$")
@@ -21,7 +18,6 @@ FORM_CHOICES = [
     ("Syrup", "Syrup"),
     ("Injection", "Injection"),
 ]
-
 
 class UserManager(models.Manager):
     def create_user(self, first_name, last_name, email, password):
@@ -59,32 +55,12 @@ class PharmacyManager(models.Manager):
     def active(self):
         return self.filter(is_active=True)
 
-    def by_city(self, city_name):
-        return self.filter(city__iexact=city_name)
-
 class MedicineManager(models.Manager):
     def search(self, keyword):
         return self.filter(
             models.Q(name__icontains=keyword) |
             models.Q(generic_name__icontains=keyword)
         )
-
-class InventoryManager(models.Manager):
-    def in_stock(self):
-        return self.filter(status="IN", quantity__gt=0)
-
-    def out_of_stock(self):
-        return self.filter(status="OUT") | self.filter(quantity=0)
-
-    def by_pharmacy(self, pharmacy_id):
-        return self.filter(pharmacy_id=pharmacy_id)
-
-    def by_medicine(self, medicine_id):
-        return self.filter(medicine_id=medicine_id)
-
-
-
-
 class User(models.Model):
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
@@ -139,6 +115,8 @@ class Medicine(models.Model):
             raise ValidationError("Invalid generic name.")
         if not STRENGTH_RE.match(self.strength):
             raise ValidationError("Invalid strength format (e.g., '500mg').")
+    def __str__(self):
+        return f"{self.name}"
 
 class Inventory(models.Model):
     STATUS_CHOICES = [
@@ -150,9 +128,8 @@ class Inventory(models.Model):
     status = models.CharField(max_length=3, choices=STATUS_CHOICES, default='IN')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
-    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    objects = InventoryManager()
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE,null=True, blank=True)
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, null=True, blank=True)
     class Meta:
         unique_together = ("medicine", "pharmacy")
 
@@ -165,7 +142,8 @@ class Inventory(models.Model):
             raise ValidationError("If quantity = 0, status must be OUT.")
         if self.quantity > 0 and self.status != "IN":
             raise ValidationError("If quantity > 0, status must be IN.")
-        if Inventory.objects.exclude(pk=self.pk).filter(
-            medicine=self.medicine, pharmacy=self.pharmacy
-        ).exists():
-            raise ValidationError("This medicine already exists in this pharmacy.")
+        if self.medicine and self.pharmacy:
+            if Inventory.objects.exclude(pk=self.pk).filter(
+                medicine=self.medicine, pharmacy=self.pharmacy
+            ).exists():
+                raise ValidationError("This medicine already exists in this pharmacy.")

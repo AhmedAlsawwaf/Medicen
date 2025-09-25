@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Medicine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% load static %}
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+
+<!-- delete modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title text-white"><i class="fa-solid fa-triangle-exclamation me-2"></i> Confirm Delete</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p id="deleteMessage">Are you sure you want to delete this item?</p>
+      </div>
+      <div class="modal-footer">
+        <form method="post" id="deleteForm">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash me-1"></i> Yes, Delete
+          </button>
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa-solid fa-xmark me-1"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- navbar and content -->
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center fw-bold fs-2" href="{% url 'search_medicine' %}">
+        <i class="fa-solid fa-capsules me-2 fs-1"></i>
+        Medicine
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center fs-5">
+          <li class="nav-item">
+            <a class="nav-link fw-bold" href="{% url 'search_medicine' %}">Find Medicine</a>
+          </li>
+          {% if request.session.user_id %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}"> My Pharmacy
+            </a>
+          </li>
+          <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-light btn-sm ms-2">
+                <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+              </button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="btn btn-outline-light btn-sm ms-2" href="{% url 'auth_page' %}">
+              <i class="fa-solid fa-right-to-bracket me-1"></i> Login / Register
+            </a>
+          </li>
+        {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <main class="container my-4">
+    {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert 
+        {% if message.tags == 'success' %}alert-success
+        {% elif message.tags == 'error' %}alert-danger
+        {% elif message.tags == 'warning' %}alert-warning
+        {% elif message.tags == 'info' %}alert-info
+        {% else %}alert-secondary{% endif %}
+        alert-dismissible fade show" role="alert">
+        
+        <i class="fa-solid 
+          {% if message.tags == 'success' %}fa-circle-check
+          {% elif message.tags == 'error' %}fa-triangle-exclamation
+          {% elif message.tags == 'warning' %}fa-circle-exclamation
+          {% elif message.tags == 'info' %}fa-circle-info
+          {% else %}fa-bell{% endif %} me-2"></i>
+        
+        {{ message }}
+        
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% block content %}
+    {% endblock %}
+  </main>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const deleteModal = document.getElementById("deleteModal");
+      const deleteMessage = document.getElementById("deleteMessage");
+      const deleteForm = document.getElementById("deleteForm");
+
+      deleteModal.addEventListener("show.bs.modal", function(event) {
+        const button = event.relatedTarget;
+        const itemName = button.getAttribute("data-item");
+        const actionUrl = button.getAttribute("data-url");
+
+        deleteMessage.textContent = `Are you sure you want to delete "${itemName}"?`;
+        deleteForm.setAttribute("action", actionUrl);
+      });
+    });
+  </script>
+</body>
+</html>

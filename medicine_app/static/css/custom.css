@@ -1,0 +1,72 @@
+body {
+  background-color: #FDEBD0 !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  color: #DC143C;
+  font-weight: 600;
+}
+a {
+  color: #DC143C;
+}
+a:hover {
+  color: #F75270;
+}
+
+.navbar {
+  background-color: #DC143C !important; 
+}
+.navbar-brand,
+.navbar-nav .nav-link {
+  color: #FDEBD0 !important; 
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+.navbar-nav .nav-link:hover {
+  color: #F7CAC9 !important; 
+}
+.navbar-nav .nav-link.active {
+  color: #fff !important;
+  border-bottom: 2px solid #F75270;
+}
+.btn-primary {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #3284ff !important;
+  border-color: #3284ff !important;
+}
+
+.alert-success {
+  color: green !important;
+  border: 1px solid green !important;
+}
+.alert-danger {
+  border: 1px solid #DC143C !important;
+  color: #DC143C !important;
+}
+.alert-warning {
+  border: 1px solid #F7CAC9 !important;
+  color: #F7CAC9 !important;
+}
+.alert-info {
+  border: 1px solid #3284ff !important;
+  color: #3284ff !important;
+}
+
+
+.card {
+  border: 1px solid #F7CAC9;
+}
+.card-header {
+  background-color: #F7CAC9;
+  color: #DC143C;
+}
+.list-group-item {
+  border-color: #F7CAC9;
+}
+.list-group-item:hover {
+  background-color: #FDEBD0;
+}
+

@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+      <i class="fa-solid fa-prescription-bottle-medical me-2"></i>
+      Inventory - {{ pharmacy.name }}
+    </h2>
+    <div>
+      <button class="btn btn-sm btn-success me-2" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+        <i class="fa-solid fa-plus me-1"></i> Add Existing Medicine
+      </button>
+      <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+        <i class="fa-solid fa-capsules me-1"></i> Add New Medicine
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Form</th>
+            <th>Strength</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventory_items %}
+          <tr>
+            <td>{{ item.medicine.name }}</td>
+            <td>{{ item.medicine.form }}</td>
+            <td>{{ item.medicine.strength }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }} $</td>
+            <td>
+              {% if item.status == 'IN' %}
+                <span class="badge bg-success">In Stock</span>
+              {% else %}
+                <span class="badge bg-danger">Out of Stock</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editInventoryModal{{ item.id }}">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      data-item="{{ item.medicine.name }}"
+                      data-url="{% url 'delete_inventory' item.id %}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Edit Inventory Modal -->
+          <div class="modal fade" id="editInventoryModal{{ item.id }}" tabindex="-1" aria-labelledby="editInventoryLabel{{ item.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form method="post" action="{% url 'edit_inventory' item.id %}">
+                  {% csrf_token %}
+                  <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title text-white" id="editInventoryLabel{{ item.id }}">
+                      <i class="fa-solid fa-pen me-2"></i>Edit Inventory - {{ item.medicine.name }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                  </div>
+
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label for="quantity{{ item.id }}" class="form-label">Quantity</label>
+                      <input type="number" name="quantity" id="quantity{{ item.id }}" class="form-control" min="0" value="{{ item.quantity }}">
+                    </div>
+                    <div class="mb-3">
+                      <label for="price{{ item.id }}" class="form-label">Price</label>
+                      <input type="number" name="price" id="price{{ item.id }}" class="form-control" step="0.01" min="0" value="{{ item.price }}">
+                    </div>
+                    <div class="mb-3">
+                      <label for="status{{ item.id }}" class="form-label">Status</label>
+                      <select name="status" id="status{{ item.id }}" class="form-select">
+                        <option value="IN" {% if item.status == "IN" %}selected{% endif %}>In Stock</option>
+                        <option value="OUT" {% if item.status == "OUT" %}selected{% endif %}>Out of Stock</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- add existing medicine modal -->
+<div class="modal fade" id="addInventoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'add_inventory' pharmacy.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="existing">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title text-white" id="addInventoryLabel">
+            <i class="fa-solid fa-plus me-2"></i>Add Existing Medicine
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            {{ inventory_form.medicine.label_tag }}
+            {{ inventory_form.medicine }}
+            {% if inventory_form.medicine.errors %}
+              <div class="text-danger small">{{ inventory_form.medicine.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            {{ inventory_form.quantity.label_tag }}
+            {{ inventory_form.quantity }}
+            {% if inventory_form.quantity.errors %}
+              <div class="text-danger small">{{ inventory_form.quantity.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            {{ inventory_form.price.label_tag }}
+            {{ inventory_form.price }}
+            {% if inventory_form.price.errors %}
+              <div class="text-danger small">{{ inventory_form.price.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            {{ inventory_form.status.label_tag }}
+            {{ inventory_form.status }}
+            {% if inventory_form.status.errors %}
+              <div class="text-danger small">{{ inventory_form.status.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Add</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- add new medicine modal -->
+<div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="post" action="{% url 'add_inventory' pharmacy.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="new">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title text-white" id="addMedicineLabel">Add New Medicine & Inventory</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row">
+            <!-- Medicine Form -->
+            <div class="col-md-6 border-end">
+              <h6 class="fw-bold mb-3 text-white">Medicine Information</h6>
+
+              <div class="mb-3">
+                {{ medicine_form.name.label_tag }}
+                {{ medicine_form.name }}
+                {% if medicine_form.name.errors %}
+                  <div class="text-danger small">{{ medicine_form.name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                {{ medicine_form.generic_name.label_tag }}
+                {{ medicine_form.generic_name }}
+                {% if medicine_form.generic_name.errors %}
+                  <div class="text-danger small">{{ medicine_form.generic_name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                {{ medicine_form.form.label_tag }}
+                {{ medicine_form.form }}
+                {% if medicine_form.form.errors %}
+                  <div class="text-danger small">{{ medicine_form.form.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                {{ medicine_form.strength.label_tag }}
+                {{ medicine_form.strength }}
+                {% if medicine_form.strength.errors %}
+                  <div class="text-danger small">{{ medicine_form.strength.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                {{ medicine_form.description.label_tag }}
+                {{ medicine_form.description }}
+                {% if medicine_form.description.errors %}
+                  <div class="text-danger small">{{ medicine_form.description.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Inventory Form -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3 text-white">Inventory Information</h6>
+              <div class="mb-3">
+                {{ inventory_no_medicine_form.quantity.label_tag }}
+                {{ inventory_no_medicine_form.quantity }}
+                {% if inventory_no_medicine_form.quantity.errors %}
+                  <div class="text-danger small">{{ inventory_no_medicine_form.quantity.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                {{ inventory_no_medicine_form.price.label_tag }}
+                {{ inventory_no_medicine_form.price }}
+                {% if inventory_no_medicine_form.price.errors %}
+                  <div class="text-danger small">{{ inventory_no_medicine_form.price.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                {{ inventory_no_medicine_form.status.label_tag }}
+                {{ inventory_no_medicine_form.status }}
+                {% if inventory_no_medicine_form.status.errors %}
+                  <div class="text-danger small">{{ inventory_no_medicine_form.status.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

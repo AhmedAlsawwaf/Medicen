@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 d-flex flex-column align-items-center">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-danger">
+      <i class="fa-solid fa-magnifying-glass"></i> Find Medicine
+    </h2>
+    <p class="text-muted">Search by name or generic name</p>
+  </div>
+
+  <form action="get" class="col-md-7 mb-4">
+    <div>
+      <input type="text" name="keyword" id="search-box" value="{{ keyword|default:'' }}" class="form-control form-control-lg" placeholder="Search keyword...">
+    </div>
+  </form>
+  
+  <div class="card shadow-sm col-md-9">
+    <div class="card-header bg-danger text-white fw-bold">
+      Search Results
+    </div>
+    <ul class="list-group list-group-flush" id="search-results">
+      {% for med in medicines %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ med.name }}</strong> 
+            <span class="text-muted">({{ med.strength }}, {{ med.form }})</span><br>
+            <small class="text-secondary">Generic: {{ med.generic_name }}</small>
+          </div>
+          <a href="{% url 'medicine_detail' med.id %}" class="btn btn-sm btn-outline-primary">
+            View
+          </a>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-center text-muted">
+          No medicines found.
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<script>
+document.getElementById("search-box").addEventListener("keyup", function() {
+    let keyword = this.value;
+
+    fetch("{% url 'search_medicine' %}?keyword=" + encodeURIComponent(keyword) + "&ajax=1", {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        let resultsDiv = document.getElementById("search-results");
+        resultsDiv.innerHTML = "";
+        if (data.results.length === 0) {
+            resultsDiv.innerHTML = `<li class="list-group-item text-center text-muted">No medicines found.</li>`;
+        } else {
+            data.results.forEach(med => {
+                resultsDiv.innerHTML += `
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>${med.name}</strong>
+                      <span class="text-muted">(${med.strength}, ${med.form})</span><br>
+                      <small class="text-secondary">Generic: ${med.generic_name}</small>
+                    </div>
+                    <a href="/medicine/${med.id}/" class="btn btn-sm btn-outline-primary">View</a>
+                  </li>
+                `;
+            });
+        }
+    })
+    .catch(err => console.error("AJAX error:", err));
+});
+</script>
+
+{% endblock %}

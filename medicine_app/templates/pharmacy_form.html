@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white fw-bold text-center">
+          {% if edit %}
+            <i class="fa-solid fa-prescription-bottle-medical me-2"></i> Edit Pharmacy
+          {% else %}
+            <i class="fa-solid fa-plus me-2"></i>Add Pharmacy
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              {{ form.name.label_tag }}
+              {{ form.name }}
+              {{ form.name.errors }}
+            </div>
+            <div class="mb-3">
+              {{ form.city.label_tag }}
+              {{ form.city }}
+              {{ form.city.errors }}
+            </div>
+            <div class="mb-3">
+              {{ form.address.label_tag }}
+              {{ form.address }}
+              {{ form.address.errors }}
+            </div>
+            <div class="mb-3">
+              {{ form.phone.label_tag }}
+              {{ form.phone }}
+              {{ form.phone.errors }}
+            </div>
+            <div class="mb-3">
+              {{ form.cr_number.label_tag }}
+              {{ form.cr_number }}
+              {{ form.cr_number.errors }}
+            </div>
+            <div class="form-check mb-3">
+              {{ form.is_active }}
+              {{ form.is_active.label_tag }}
+              {{ form.is_active.errors }}
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-save me-1"></i> Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
