@@ -1,23 +1,12 @@
-# Python
+.vscode
+
+env/
+
+venv/
+ 
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.so
 
-# Env & secrets
-.env
-*.env
-!.env.example
+.vscode/
 
-# Django
-db.sqlite3
-media/
-staticfiles/
+db.mysql
 
-# OS/editor
-.DS_Store
-*.log
-
-# VCS noise
-*.orig
