@@ -70,3 +70,4 @@ a:hover {
   background-color: #FDEBD0;
 }
 
+.table-responsive { width: 100%; overflow-x: auto; }
